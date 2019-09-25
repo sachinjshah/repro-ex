@@ -43,7 +43,7 @@ library(haven)
 ctop_clean <- read_sas("ex_data.sas7bdat", 
     NULL)
 
-#ctop_clean <-ctop_clean[which(ctop_clean$age > 18), ]
+ctop_clean <-ctop_clean[which(ctop_clean$age > 18), ]
 
 
 ```
