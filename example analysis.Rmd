@@ -1,0 +1,93 @@
+---
+title: "This is an example"
+author: "Sachin J Shah"
+date: "2019-09-24"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+   
+
+
+```{r setup, include=FALSE}
+
+## Load the libraries we will be using
+library(gapminder)
+library(here)
+library(socviz)
+library(tidyverse)
+library(plyr)
+
+library('dplyr')      # for data manipulation
+library('tidyr')      # for reshaping data
+
+library('ggplot2')    # plotting data
+library('scales')     # for scale_y_continuous(label = percent)
+library('ggthemes')   # for scale_fill_few('medium')
+
+library('ztable')     # format tables for reporting
+
+library(data.table)
+library(formattable)
+
+knitr::opts_chunk$set(echo = FALSE) 
+
+## Set the default size of figures
+knitr::opts_chunk$set(fig.width=7, fig.height=5)  
+knitr::opts_chunk$set(comment = NA)
+options(ztable.type = 'html')
+
+library(haven)
+ctop_clean <- read_sas("ex_data.sas7bdat", 
+    NULL)
+
+#ctop_clean <-ctop_clean[which(ctop_clean$age > 18), ]
+
+
+```
+
+###1. Use it to create updating Tables and Figures
+
+```{r table1, echo=FALSE}
+
+eng_tot <- sum((ctop_clean$apex_lang_cat == "1. English"))
+eng_yes <- sum((ctop_clean$apex_lang_cat == "1. English") & (ctop_clean$reply_to_any_q == "Yes"))
+eng_p <- eng_yes / eng_tot
+eng<- prop.test(eng_yes, eng_tot)
+
+span_tot <- sum((ctop_clean$apex_lang_cat == "2. Spanish"))
+span_yes <- sum((ctop_clean$apex_lang_cat == "2. Spanish") & (ctop_clean$reply_to_any_q == "Yes"))
+span_p <- span_yes / span_tot
+span <- prop.test(span_yes,span_tot)
+
+cant_tot <- sum((ctop_clean$apex_lang_cat == "3. Cantonese"))
+cant_yes <- sum((ctop_clean$apex_lang_cat == "3. Cantonese") & (ctop_clean$reply_to_any_q == "Yes"))
+cant_p <- cant_yes / cant_tot
+cant <- prop.test(cant_yes, cant_tot)
+
+oth_tot <- sum((ctop_clean$apex_lang_cat == "4. Other"))
+oth_yes <- sum((ctop_clean$apex_lang_cat == "4. Other") & (ctop_clean$reply_to_any_q == "Yes"))
+oth_p <- oth_yes / oth_tot 
+oth <- prop.test(oth_yes, oth_tot)
+
+
+test_table <- table(ctop_clean$apex_lang_cat, ctop_clean$reply_to_any_q)
+sig_test <- chisq.test(test_table)
+
+table1 <- data.frame(Total <- c("English", "Spanish", "Cantonese", "Other"), Respond <- c(eng_yes, span_yes, cant_yes, oth_yes), c(eng_tot, span_tot, cant_tot, oth_tot),  Percent <- c(eng_p, span_p, cant_p, oth_p))
+
+names(table1) <- c("Language", "Responded", "Total", "Percent")
+
+formattable(table1, align = 'r', list('Language' = formatter("span", style = ~ style(font.weight = "bold")),
+            area(col = 4) ~ function(x) percent(x, digits = 0)                              
+                    ))
+
+```
+
+###2. Use it to create updating manuscript text
+In our study, we found no difference in response rate by langage. We observed a response rate of `r (round(eng[[4]],digits=2))*100`% (95% CI `r (round(eng[[6]], digits=2))*100`%) among patients who prefer English, `r (round(span[[4]],digits=2))*100`% (95% CI, `r (round(span[[6]], digits=2))*100`%) among patients who preferred Spanish, `r (round(cant[[4]],digits=2))*100`% (95% CI, `r (round(cant[[6]], digits=2))*100`%) among those who prefer Cantonese, and `r (round(oth[[4]],digits=2))*100`% (95% CI, `r (round(oth[[6]], digits=2))*100`%) among those who prefer another language (p=`r round(sig_test[[3]], digits=2)`).
+
+
+
