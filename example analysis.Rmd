@@ -3,9 +3,9 @@ title: "This is an example"
 author: "Sachin J Shah"
 date: "2019-09-24"
 output:
-  word_document: default
   html_document: default
   pdf_document: default
+  word_document: default
 ---
 
    
